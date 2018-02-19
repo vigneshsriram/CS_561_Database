@@ -1,0 +1,33 @@
+with custProdAvg as (
+    select cust,prod , round(avg(quant)) as the_avg
+    from sales
+    group by cust,prod
+    order by cust,prod
+	),
+--get unique cust prod values
+Products as (
+	select distinct prod, cust
+    from sales),
+
+--different cust but same prod
+otherCustomers as (
+    select Products.cust , Products.prod, round(avg(quant)) as other_cust_avg
+    from sales, Products
+    where sales.cust != Products.cust and sales.prod = Products.prod
+    group by Products.cust , Products.prod
+    order by cust,prod
+    ),
+--same cust but diff prod
+otherProducts  as (
+	select Products.cust , Products.prod,round(avg(sales.quant)) as other_prod_avg
+    from sales, Products
+    where sales.prod != Products.prod and Products.cust=sales.cust
+    group by Products.cust,Products.prod
+    order by cust,prod
+    )
+
+select * from custProdAvg natural full outer join otherCustomers 
+natural full outer join otherProducts
+
+
+
