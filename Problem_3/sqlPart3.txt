@@ -1,0 +1,97 @@
+with quater as(
+	select distinct month,'Q1' as quat
+    from sales
+	where month between 1 and 3
+    union 
+	select distinct month,'Q2'as quat
+    from sales
+	where month between 4 and 6
+     union
+	select distinct month,'Q3'as quat
+    from sales
+	where month between 7 and 9
+     union
+	select distinct month,'Q4'as quat
+    from sales
+	where month between 10 and 12
+    ),
+   
+    custProd as (
+    select distinct cust,prod,quant,month from sales
+    order by cust,prod),
+    
+	--gets the cust , prod , Quant and Quat
+    custProdQuant as (select * from custProd natural join quater),
+    --select * from custProdQuant
+	--gwts the cust , prod , aveg , min and quat    
+    avgMin as 
+    (select cust, prod ,round(avg(quant)) as aveg, min(quant) as min, quat
+    from custProdQuant
+    group by cust,prod,quat
+    order by cust,prod,quat),
+    --select * from avgMin
+   
+   --Q2
+   	 tempq2before as (
+    select f1.cust,f1.prod , 'Q2' as quaterr ,  count(f2.cust) as before
+    from avgMin as f1,custProdQuant as f2
+    where f1.cust = f2.cust and f1.prod = f2.prod and f1.quat = 'Q2' and f2.quat = 'Q1'
+    and f2.quant between f1.min and f1.aveg 
+    group by f1.cust, f1.prod),
+        
+    tempQ2after as 
+    (select f1.cust,f1.prod , 'Q2' as quaterr ,  count(f2.cust) as after
+    from avgMin as f1,custProdQuant as f2
+    where f1.cust = f2.cust and f1.prod = f2.prod and f1.quat = 'Q2' and f2.quat = 'Q3'
+    and f2.quant between f1.min and f1.aveg 
+    group by f1.cust, f1.prod),
+    
+    --Q3
+    tempq3before as (
+    select f1.cust,f1.prod , 'Q3' as quaterr ,  count(f2.cust) as before
+    from avgMin as f1,custProdQuant as f2
+    where f1.cust = f2.cust and f1.prod = f2.prod and f1.quat = 'Q3' and f2.quat = 'Q2'
+    and f2.quant between f1.min and f1.aveg 
+    group by f1.cust, f1.prod),
+        
+    tempQ3after as 
+    (select f1.cust,f1.prod , 'Q3' as quaterr ,  count(f2.cust) as after
+    from avgMin as f1,custProdQuant as f2
+    where f1.cust = f2.cust and f1.prod = f2.prod and f1.quat = 'Q3' and f2.quat = 'Q4'
+    and f2.quant between f1.min and f1.aveg 
+    group by f1.cust, f1.prod),
+    
+    
+    --join all the tables
+    allJoin as (
+     --Q1
+    select f1.cust,f1.prod , 'Q1' as quaterr , null as before, count(f2.cust) as after
+    from avgMin as f1,custProdQuant as f2
+    where f1.cust = f2.cust and f1.prod = f2.prod and f1.quat = 'Q1' and f2.quat = 'Q2'
+    and f2.quant between f1.min and f1.aveg 
+    group by f1.cust, f1.prod
+    
+    union
+    --Q4
+    select f1.cust,f1.prod , 'Q4' as quaterr ,  count(f2.cust) as before, null as after
+    from avgMin as f1,custProdQuant as f2
+    where f1.cust = f2.cust and f1.prod = f2.prod and f1.quat = 'Q4' and f2.quat = 'Q3'
+    and f2.quant between f1.min and f1.aveg 
+    group by f1.cust, f1.prod
+    
+    union
+        
+    select * 
+    from tempq2before natural full outer join tempQ2after
+        
+    union
+        
+    select * 
+    from tempq3before natural full outer join tempQ3after)
+    
+--display all the values    
+select cust , prod , quaterr as  quarter , before , after from allJoin
+order by cust,prod,quaterr
+    
+   
+
