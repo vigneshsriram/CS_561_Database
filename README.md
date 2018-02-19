@@ -5,3 +5,5 @@ Use the load_sales_table.sql to create the sales table. After creating the sales
 
 Database: I have used PostgreSQL version 4 to write the sql queries. Download postgreSQL from here https://www.postgresql.org/.
 
+Java Code: The IDE which I have used is Eclipse. Before executing the Java code you must import the jars for postgresql.
+
