@@ -1,0 +1,50 @@
+-- Take out all the quaters and calculate each ones average for each cust, prod and quater
+with Quat1(cust,prod, quarter, average) as (
+    select cust, prod, 'Q1', round(avg(quant))
+    from sales
+    where month between 1 and 3
+    group by cust,prod
+    ),
+
+    Quat2(cust,prod, quarter,average) as (
+    select cust,prod, 'Q2', round(avg(quant))
+    from sales
+    where month between 4 and 6
+    group by cust,prod
+    ),
+
+    Quat3(cust,prod, quarter, average) as (
+    select cust,prod, 'Q3', round(avg(quant))
+    from sales
+    where month between 7 and 9
+    group by cust,prod
+    ),
+
+    Quat4(cust,prod, quarter, average) as (
+    select cust,prod, 'Q4', round(avg(quant))
+    from sales
+    where month between 10 and 12
+    group by cust,prod
+    ),
+	--arrange the quater with before and after values
+    QuarterFinal (cust,prod,quarter,before_avg,after_avg) as (
+    select cust, prod, 'Q1', null,	q2.average
+    from Quat4 as q4  full outer join Quat2 as q2
+    using(cust,prod)
+    union
+    select cust, prod, 'Q2', q1.average , q3.average
+    from Quat1 as q1  full outer join Quat3 as q3
+    using(cust,prod)
+    union
+    select cust, prod, 'Q3', q2.average,	q4.average
+    from Quat2 as q2  full outer join Quat4 as q4
+    using(cust,prod)
+    union
+    select cust, prod, 'Q4', q3.average ,	null
+    from Quat3 as q3  full outer join Quat2 as q2
+    using(cust,prod))
+    
+select * from QuarterFinal
+where before_avg is not null or after_avg is not null
+order by cust,prod,quarter
+
