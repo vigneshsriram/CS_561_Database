@@ -1,5 +1,5 @@
 # CS_561_Database
-Here we have one table called as the Sales table. We write SQL queries using postgreSQL and the get the same result using Java code(without saving the table in the memory)
+Here we have one table called as the Sales table. We write SQL queries and fetch data from the sales table. The same queries are also written in Java.
 
 Use the load_sales_table.sql to create the sales table. After creating the sales table load the sales table.
 
